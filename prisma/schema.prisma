@@ -11,16 +11,40 @@ model Category {
   name         String   @unique
   slug         String   @unique
   subCategories SubCategory[]
+  products     Product[]
   createdAt    DateTime @default(now())
 }
 
 model SubCategory {
-  id          Int      @id @default(autoincrement())
-  name        String
-  slug        String   @unique
-  categoryId  Int
-  category    Category @relation(fields: [categoryId], references: [id])
-  createdAt   DateTime @default(now())
+  id        Int      @id @default(autoincrement())
+  name      String
+  slug      String   @unique
+  categoryId Int
+  category  Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  products  Product[]
+  createdAt DateTime @default(now())
   
   @@index([categoryId])
 }
+
+model Product {
+  id            Int         @id @default(autoincrement())
+  name          String      @unique
+  slug          String      @unique
+  description   String?     @db.Text
+  price         Float
+  discountPrice Float?
+  stock         Int         @default(0)
+  sku           String      @unique
+  categoryId    Int
+  subCategoryId Int
+  category      Category    @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  subCategory   SubCategory @relation(fields: [subCategoryId], references: [id], onDelete: Cascade)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@index([categoryId])
+  @@index([subCategoryId])
+  @@index([slug])
+}
+

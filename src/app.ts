@@ -2,6 +2,7 @@
 import express from "express";
 import cors from "cors";
 import categoryRoutes from "./routes/categoryRoutes";
+import productRoutes from "./routes/productRoutes";
 
 const app = express();
 
@@ -25,6 +26,9 @@ app.get("/", (_req, res) => {
 
 // Category Routes
 app.use("/api", categoryRoutes);
+
+// Product Routes
+app.use("/api", productRoutes);
 
 // 404 handler
 app.use((_req, res) => {
