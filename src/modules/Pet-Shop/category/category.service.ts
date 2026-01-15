@@ -1,4 +1,5 @@
-import { prisma } from "../lib/prisma";
+import { prisma } from "../../../utils/prisma";
+import { generateSlug } from "../../../utils/slugGenerator";
 import {
   CreateCategoryDTO,
   UpdateCategoryDTO,
@@ -11,20 +12,13 @@ import {
 export const categoryService = {
   // Get all categories
   async getAllCategories(): Promise<CategoryResponse[]> {
-    return await prisma.category.findMany({
-      include: {
-        subCategories: true,
-      },
-    });
+    return await prisma.category.findMany();
   },
 
   // Get category by ID
-  async getCategoryById(id: number): Promise<CategoryResponse | null> {
+  async getCategoryById(id: string): Promise<CategoryResponse | null> {
     return await prisma.category.findUnique({
       where: { id },
-      include: {
-        subCategories: true,
-      },
     });
   },
 
@@ -32,35 +26,32 @@ export const categoryService = {
   async getCategoryBySlug(slug: string): Promise<CategoryResponse | null> {
     return await prisma.category.findUnique({
       where: { slug },
-      include: {
-        subCategories: true,
-      },
     });
   },
 
   // Create category
   async createCategory(data: CreateCategoryDTO) {
     return await prisma.category.create({
-      data,
-      include: {
-        subCategories: true,
+      data: {
+        ...data,
+        slug: data.slug || generateSlug(data.name),
       },
     });
   },
 
   // Update category
-  async updateCategory(id: number, data: UpdateCategoryDTO) {
+  async updateCategory(id: string, data: UpdateCategoryDTO) {
     return await prisma.category.update({
       where: { id },
-      data,
-      include: {
-        subCategories: true,
+      data: {
+        ...data,
+        slug: data.slug || (data.name ? generateSlug(data.name) : undefined),
       },
     });
   },
 
   // Delete category
-  async deleteCategory(id: number) {
+  async deleteCategory(id: string) {
     return await prisma.category.delete({
       where: { id },
     });
