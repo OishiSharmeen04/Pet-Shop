@@ -1,6 +1,8 @@
-export const generateSlug = (name: string): string => {
-  return name
+export const generateSlug = (text: string): string => {
+  return text
     .toLowerCase()
-    .replace(/[^\w\s-]/g, '')
-    .replace(/\s+/g, '-');
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
 };

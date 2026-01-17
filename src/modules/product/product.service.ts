@@ -1,5 +1,5 @@
-import { prisma } from "../lib/prisma";
-import { generateSlug } from "../lib/slugGenerator";
+import { prisma } from "../../utils/prisma";
+import { generateSlug } from "../../utils/slugGenerator";
 
 export const productService = {
   // Get all products
