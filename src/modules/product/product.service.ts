@@ -29,15 +29,81 @@ const createProduct = async (payload: {
   });
 };
 
-const getAllProducts = async () => {
+const getAllProducts = async (query: {
+  search?: string;
+  categoryId?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  sortBy?: "salePrice" | "createdAt";
+  sortOrder?: "asc" | "desc";
+  page?: number;
+  limit?: number;
+}) => {
+  const {
+    search,
+    categoryId,
+    minPrice,
+    maxPrice,
+    sortBy = "createdAt",
+    sortOrder = "desc",
+    page = 1,
+    limit = 10,
+  } = query;
+
+  const skip = (page - 1) * limit;
+
   return prisma.product.findMany({
-    include: {
-      category: true,
-      images: true,
-      variants: true,
+    where: {
+      isActive: true,
+
+      // 🔍 SEARCH
+      ...(search && {
+        name: {
+          contains: search,
+          mode: "insensitive",
+        },
+      }),
+
+      // 🧩 FILTER
+      ...(categoryId && { categoryId }),
+
+      ...(minPrice || maxPrice
+        ? {
+            salePrice: {
+              ...(minPrice && { gte: minPrice }),
+              ...(maxPrice && { lte: maxPrice }),
+            },
+          }
+        : {}),
     },
+
+    // 📦 LIGHT DATA ONLY
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+      salePrice: true,
+      basePrice: true,
+      images: {
+        where: { isMain: true },
+        select: { url: true },
+      },
+      category: {
+        select: { name: true },
+      },
+    },
+
+    // ↕️ SORT
+    orderBy: {
+      [sortBy]: sortOrder,
+    },
+
+    // 📄 PAGINATION
+    skip,
+    take: limit,
   });
 };
+
 
 const getProductById = async (id: string) => {
   return prisma.product.findUnique({
